@@ -1,0 +1,29 @@
+{
+  "name": "rman",
+  "version": "1.0.0",
+  "description": "Project Resource Management System",
+  "license": "ISC",
+  "author": {
+    "name": "GingerTek",
+    "url": "https://github.com/ginger-tek"
+  },
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@ginger-tek/picovue": "^2.0.12",
+    "@picocss/pico": "^2.0.6",
+    "better-sqlite3": "^11.8.1",
+    "bootstrap-icons": "^1.11.3",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "luxon": "^3.5.0",
+    "morgan": "^1.10.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  }
+}
