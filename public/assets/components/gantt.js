@@ -9,16 +9,18 @@ export default {
   },
   template: `<div class="gantt-tools flex shrink-ui">
     <fieldset role="group">
-      <button @click="shiftDaySpan" :disabled="daySpan == 7"><i class="bi bi-dash"></i></button>
-      <button disabled>{{ daySpan / 7 + ' Week' + (daySpan > 7 ? 's' : '') }}</button>
-      <button @click="shiftDaySpan(1)" :disabled="daySpan == 28"><i class="bi bi-plus"></i></button>
+      <button @click="shiftDaySpan" title="Shorten Date Range" :disabled="daySpan == 7"><i class="bi bi-dash"></i></button>
+      <button @click="shiftDaySpan(1)" title="Lengthen Date Range" :disabled="daySpan == 28"><i class="bi bi-plus"></i></button>
     </fieldset>
-    <fieldset role="group" style="flex:1">
-      <button @click="shiftRange"><i class="bi bi-chevron-left"></i></button>
-      <button disabled>{{ filters.start.toFormat('MMM d') }} - {{ filters.end.toFormat('MMM d') }}</button>
-      <button @click="shiftRange(1)"><i class="bi bi-chevron-right"></i></button>
+    <fieldset role="group">
+      <button @click="shiftRange" title="Shift Previous Week"><i class="bi bi-chevron-left"></i></button>
+      <button @click="resetToToday" title="Reset back to Today" :disabled="todayWithinRange"><i class="bi bi-arrow-clockwise"></i></button>
+      <button @click="shiftRange(1)" title="Shift Next Week"><i class="bi bi-chevron-right"></i></button>
     </fieldset>
-    <button @click="resetToToday" :disabled="todayWithinRange"><i class="bi bi-arrow-clockwise"></i> Today</button>
+    <div style="flex:1;text-align:center"><b>{{ filters.start.toFormat('MMM d') }} - {{ filters.end.toFormat('MMM d') }} | {{ daySpan / 7 + ' Week' + (daySpan > 7 ? 's' : '') }}</b></div>
+    <fieldset role="group">
+      <button @click="toggleWeekends=!toggleWeekends" title="Show/Hide Weekends" :class="{secondary:!toggleWeekends}"><i class="bi bi-layout-split"></i></button>
+    </fieldset>
   </div>
   <div class="gantt-wrap">
     <div class="gantt">
@@ -28,10 +30,12 @@ export default {
         </div>
       </div>
       <div class="projects">
-        <div :="calcPosition(p)" v-for="p in projects" :key="p.id">
+        <div :="p.position" v-for="p in projects" :key="p.id">
           <article :class="['status-' + p.status.toLowerCase().replace(' ','-')]">
             <details name="gantt-project">
-              <summary><b>{{ p.title }}</b> <span class="badge">{{ p.resourceCount }}</span></summary>
+              <summary>
+                <b>{{ p.title }}</b> <span class="badge" :data-tooltip="p.resourceCount + ' Active Resources'"><i class="bi bi-person"></i>{{ p.resourceCount }}</span> <span class="badge" :data-tooltip="p.resourceHours + ' Active Hours'"><i class="bi bi-clock"></i> {{ p.resourceHours }}</span>
+              </summary>
               <article class="shrink-ui">
                 <table class="shrink-table">
                   <tbody>
@@ -64,6 +68,7 @@ export default {
       resources: []
     })
     const today = luxon.DateTime.now().toLocal()
+    const toggleWeekends = Vue.ref(true)
     const daySpan = Vue.ref(7)
     const slots = Vue.ref([])
     const projects = Vue.ref([])
@@ -75,7 +80,8 @@ export default {
       const params = new URLSearchParams()
       params.append('start', filters.start.toFormat('yyyy-MM-dd'))
       params.append('end', filters.end.toFormat('yyyy-MM-dd'))
-      projects.value = await api(`projects/gantt?${params.toString()}`)
+      const res = await api(`projects/gantt?${params.toString()}`)
+      projects.value = parseProjects(res)
     }
 
     async function previewProject(id) {
@@ -86,11 +92,18 @@ export default {
 
     function createSlots() {
       let slot = filters.start
-      slots.value = [slot]
+      slots.value = []
+      if (determineSlot(slot))
+        slots.value.push(slot)
       while (slot < filters.end) {
         slot = slot.plus({ days: 1 })
-        slots.value.push(slot)
+        if (determineSlot(slot))
+          slots.value.push(slot)
       }
+    }
+
+    function determineSlot(s) {
+      return !toggleWeekends.value ? !s.isWeekend : true
     }
 
     function shiftDaySpan(dir = 0) {
@@ -116,6 +129,10 @@ export default {
     function resetToToday() {
       filters.start = findSunday()
       filters.end = filters.start.plus({ days: 6 })
+    }
+
+    function parseProjects(res) {
+      return res.map(p => ({ ...p, position: calcPosition(p) }))
     }
 
     function calcPosition(p) {
@@ -150,6 +167,11 @@ export default {
       getProjects()
     }), { deep: true })
 
+    Vue.watch(() => toggleWeekends.value, () => Vue.nextTick(() => {
+      createSlots()
+      projects.value = parseProjects(projects.value)
+    }))
+
     const todayWithinRange = Vue.computed(() => today > filters.start && today < filters.end)
 
     return {
@@ -158,6 +180,7 @@ export default {
       projects,
       daySpan,
       today,
+      toggleWeekends,
       todayWithinRange,
       project,
       showPreview,
