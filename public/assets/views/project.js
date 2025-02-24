@@ -11,31 +11,33 @@ export default {
         </div>
       </div>
       <div class="grid">
-        <label>Project Title
-          <input type="text" v-model="project.title" required>
-        </label>
-        <label>Status
-          <select v-model="project.status" required>
-            <option>Planning</option>
-            <option>Approving</option>
-            <option>Active</option>
-            <option>Canceled</option>
-            <option>Completed</option>
-          </select>
-        </label>
-      </div>
-      <label>Description
-        <textarea v-model="project.description" rows="3"></textarea>
-      </label>
-      <label><a :href="project.link" target="_blank">Source Link <i class="bi bi-link-45deg"></i></a>
-        <input type="url" v-model="project.link" required>
-      </label>
-      <div class="grid">
-        <label>Start Date
-          <input type="date" v-model="project.startDate" required>
-        </label>
-        <label>End Date
-          <input type="date" v-model="project.endDate" required>
+        <div>
+          <label>Project Title
+            <input type="text" v-model="project.title" required>
+          </label>
+          <label>Status
+            <select v-model="project.status" required>
+              <option>Planning</option>
+              <option>Approving</option>
+              <option>Active</option>
+              <option>Canceled</option>
+              <option>Completed</option>
+            </select>
+          </label>
+          <div class="grid">
+            <label>Start Date
+              <input type="date" v-model="project.startDate" required>
+            </label>
+            <label>End Date
+              <input type="date" v-model="project.endDate" required>
+            </label>
+          </div>
+          <label><a :href="project.link" target="_blank">Source Link <i class="bi bi-link-45deg"></i></a>
+            <input type="url" v-model="project.link" required>
+          </label>
+        </div>
+        <label style="display:flex;flex-direction:column">Description
+          <textarea style="flex:1" v-model="project.description" rows="3"></textarea>
         </label>
       </div>
       <div class="flex shrink-ui">
@@ -57,25 +59,28 @@ export default {
     </template>
     <form @submit.prevent="requestResource">
       <div class="grid">
-        <div>
-          <label>Project Role
-            <select name="projectRole" @change="findAvailableResources" required>
-              <option :value="null">Select a project role</option>
-              <option v-for="role in roles" :value="role">{{ role }}</option>
-            </select>
-          </label>
-          <label>Start Date
-            <input name="startDate" type="date" :value="project.startDate" required>
-          </label>
-          <label>End Date
-            <input name="endDate"  type="date" :value="project.endDate" required>
-          </label>
-        </div>
-        <div>Available Resources
-          <label v-for="resource in availableResources">
-            <input type="radio" name="resourceId" :value="resource.id"> {{ resource.name }}
-          </label>
-        </div>
+        <label>Project Role
+          <select name="projectRole" @change="findAvailableResources" required>
+            <option :value="null">Select a project role</option>
+            <option v-for="role in roles" :value="role">{{ role }}</option>
+          </select>
+        </label>
+        <label>Weekly Hours
+          <input name="weeklyHours" type="number" value="1" required>
+        </label>
+      </div>
+      <div class="grid">
+        <label>Start Date
+          <input name="startDate" type="date" :min="project.startDate" :value="project.startDate" required>
+        </label>
+        <label>End Date
+          <input name="endDate" type="date" :max="project.endDate" :value="project.endDate" required>
+        </label>
+      </div>
+      <div>Available Resources
+        <label v-for="resource in availableResources">
+          <input type="radio" name="resourceId" :value="resource.id"> {{ resource.name }}
+        </label>
       </div>
       <div class="grid">
         <button type="reset" :disabled="loading" @click="showRequest=false" class="secondary">Cancel</button>
@@ -143,7 +148,8 @@ export default {
           endDate: ev.target.endDate.value,
         }
         const res = await api(`project-resources`, 'POST', data)
-        projectResources.value.push(res)
+        await getProjectResources()
+        showRequest.value = false
         PicoVue.appendToast('Saved!', { type: 'success' })
       } catch (ex) {
         PicoVue.appendToast('Failed to request resource', { type: 'danger' })
