@@ -143,6 +143,7 @@ export default {
         const data = {
           projectId: project.value.id,
           resourceId: ev.target.resourceId.value,
+          weeklyHours: parseFloat(ev.target.weeklyHours.value),
           projectRole: ev.target.projectRole.value,
           startDate: ev.target.startDate.value,
           endDate: ev.target.endDate.value,
@@ -150,7 +151,7 @@ export default {
         const res = await api(`project-resources`, 'POST', data)
         await getProjectResources()
         showRequest.value = false
-        PicoVue.appendToast('Saved!', { type: 'success' })
+        PicoVue.appendToast('Resource requested! Pending manager approval', { type: 'success' })
       } catch (ex) {
         PicoVue.appendToast('Failed to request resource', { type: 'danger' })
         console.error(ex)
