@@ -11,21 +11,48 @@ export function create({ projectId, resourceId, projectRole, weeklyHours, startD
 
 export function read(id) {
   const conn = connect()
-  const res = conn.prepare(`select * from project_resources
-    where id = ?`).get([id])
+  const res = conn.prepare(`select
+      pr.*,
+      r.name as resourceName,
+      p.title as projectTitle
+    from project_resources pr
+    join resources r on r.id = pr.resourceId
+    join projects p on p.id = pr.projectId
+    where pr.id = ?`).get([id])
   return res
 }
 
 export function list() {
   const conn = connect()
-  const res = conn.prepare(`select * from project_resources`).all()
+  const res = conn.prepare(`select
+      pr.*,
+      r.name as resourceName,
+      p.title as projectTitle
+    from project_resources pr
+    join resources r on r.id = pr.resourceId
+    join projects p on p.id = pr.projectId`).all()
   return res
 }
 
-export function update({ id, status, projectRole, weeklyHours, startDate, endDate }) {
+export function listByApprover(approverId, status = 'Pending') {
+  const conn = connect()
+  const res = conn.prepare(`select
+      pr.*,
+      r.name as resourceName,
+      p.title as projectTitle
+    from project_resources pr
+    join resources r on r.id = pr.resourceId
+    join projects p on p.id = pr.projectId 
+    where r.resourceApproverId = ?
+    and pr.status = ?`).all([approverId, status])
+  return res
+}
+
+export function update({ id, status, rejectReason, projectRole, weeklyHours, startDate, endDate }) {
   const conn = connect()
   const res = conn.prepare(`update project_resources set
     status = ?,
+    rejectReason = ?,
     projectRole = ?,
     weeklyHours = ?,
     startDate = ?,
@@ -33,6 +60,7 @@ export function update({ id, status, projectRole, weeklyHours, startDate, endDat
     updated = current_timestamp
   where id = ?`).run([
     status,
+    rejectReason,
     projectRole,
     weeklyHours,
     startDate,
@@ -46,5 +74,6 @@ export default {
   create,
   read,
   list,
+  listByApprover,
   update,
 }

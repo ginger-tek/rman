@@ -5,6 +5,9 @@ const routes = [
   { path: '/projects/:id', component: () => import('./views/project.js') },
   { path: '/resources', component: () => import('./views/resources.js') },
   { path: '/resources/:id', component: () => import('./views/resource.js') },
+  { path: '/approvals', component: () => import('./views/approvals.js') },
+  { path: '/my-approvals', component: () => import('./views/my-approvals.js') },
+  { path: '/approvals/:id', component: () => import('./views/approval.js') },
   { path: '/:pathMatch(.*)*', component: () => import('./views/notFound.js') },
 ]
 
