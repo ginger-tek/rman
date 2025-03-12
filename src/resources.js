@@ -16,6 +16,13 @@ export function read(id) {
   return res
 }
 
+export function find(email) {
+  const conn = connect()
+  const res = conn.prepare(`select * from resources
+    where email = ?`).get([email])
+  return res
+}
+
 export function list() {
   const conn = connect()
   const res = conn.prepare(`select
@@ -74,6 +81,7 @@ export function update({ id, name, email, resourceApproverId }) {
 export default {
   create,
   read,
+  find,
   list,
   listAvailable,
   update,
