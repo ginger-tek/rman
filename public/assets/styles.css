@@ -37,6 +37,53 @@ details {
   }
 }
 
+:where(button, [role=button]) {
+  &.success {
+    --pico-background-color: var(--pico-color-green-600);
+    --pico-border-color: var(--pico-color-green-600);
+    border: var(--pico-border-width) solid var(--pico-color-green-600);
+
+    &:is(:hover, :focus, :active) {
+      --pico-background-color: var(--pico-color-green-500);
+      --pico-border-color: var(--pico-color-green-500);
+    }
+
+    &:is(:focus) {
+      --pico-box-shadow: var(--pico-button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0)), 0 0 0 var(--pico-outline-width) rgba(124, 255, 58, 0.356);
+    }
+  }
+
+  &.warn {
+    --pico-background-color: var(--pico-color-amber-600);
+    --pico-border-color: var(--pico-color-amber-600);
+    border: var(--pico-border-width) solid var(--pico-color-amber-600);
+
+    &:is(:hover, :focus, :active) {
+      --pico-background-color: var(--pico-color-amber-500);
+      --pico-border-color: var(--pico-color-amber-500);
+    }
+
+    &:is(:focus) {
+      --pico-box-shadow: var(--pico-button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0)), 0 0 0 var(--pico-outline-width) rgba(124, 255, 58, 0.356);
+    }
+  }
+
+  &.danger {
+    --pico-background-color: var(--pico-color-red-700);
+    --pico-border-color: var(--pico-color-red-700);
+    border: var(--pico-border-width) solid var(--pico-color-red-700);
+
+    &:is(:hover, :focus, :active) {
+      --pico-background-color: var(--pico-color-red-600);
+      --pico-border-color: var(--pico-color-red-600);
+
+      &:is(:focus) {
+        --pico-box-shadow: var(--pico-button-hover-box-shadow, 0 0 0 rgba(0, 0, 0, 0)), 0 0 0 var(--pico-outline-width) rgba(255, 58, 58, 0.356);
+      }
+    }
+  }
+}
+
 .shrink-ui :where([role=button], [type=button], [type=file]::file-selector-button, [type=reset], [type=submit], button) {
   padding: calc(.5 * var(--pico-form-element-spacing-vertical)) calc(.5 * var(--pico-form-element-spacing-horizontal));
 }
@@ -182,9 +229,10 @@ article.list {
           cursor: pointer;
           padding: var(--pico-spacing);
           margin-bottom: 0;
-          
+
           >b {
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+            ;
           }
 
           &::after {
