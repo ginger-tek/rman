@@ -32,8 +32,7 @@ export function listResources(id, startDate, endDate, status = null) {
     left join resources r on r.id = pr.resourceId
     left join projects p on p.id = pr.projectId
     where pr.projectId = ?
-    and pr.startDate between ? and ?
-    and pr.endDate between ? and ?
+    and (pr.startDate between ? and ? or pr.endDate between ? and ?)
     ${status ? `and pr.status = ?` : ''}`).all([
     id,
     startDate,
@@ -54,12 +53,20 @@ export function gantt({ start, end }) {
         when p.status in ('Planning','Canceled','Completed') then 0
         else sum(pr.weeklyHours)
       end as resourceHours,
-      group_concat(r.name) as resourceList
+      group_concat(r.name,', ') as resourceList
     from projects p
-    left join project_resources pr on pr.projectId = p.id and (pr.startDate between ? and ? or pr.endDate between ? and ?) and pr.status = 'Approved'
+    left join project_resources pr on pr.projectId = p.id and (pr.startDate between ? and ?
+      or pr.endDate between ? and ?
+      or pr.startDate < ? and pr.endDate > ?) and pr.status = 'Approved'
     left join resources r on r.id = pr.resourceId
-    where (p.startDate between ? and ? or p.endDate between ? and ?)
+    where (p.startDate between ? and ?
+      or p.endDate between ? and ?
+      or p.startDate < ? and p.endDate > ?)
     group by p.id`).all([
+    start,
+    end,
+    start,
+    end,
     start,
     end,
     start,
