@@ -59,28 +59,28 @@ export default {
     </template>
     <form @submit.prevent="requestResource">
       <div class="grid">
-        <label>Project Role
-          <select name="projectRole" @change="findAvailableResources" required>
-            <option :value="null">Select a project role</option>
-            <option v-for="role in roles" :value="role">{{ role }}</option>
-          </select>
-        </label>
-        <label>Weekly Hours
-          <input name="weeklyHours" type="number" value="1" required>
-        </label>
-      </div>
-      <div class="grid">
-        <label>Start Date
-          <input name="startDate" type="date" :min="project.startDate" :value="project.startDate" required>
-        </label>
-        <label>End Date
-          <input name="endDate" type="date" :max="project.endDate" :value="project.endDate" required>
-        </label>
-      </div>
-      <div>Available Resources
-        <label v-for="resource in availableResources">
-          <input type="radio" name="resourceId" :value="resource.id"> {{ resource.name }}
-        </label>
+        <div>
+          <label>Project Role
+            <select name="projectRole" @change="findAvailableResources" required>
+              <option :value="null">Select a project role</option>
+              <option v-for="role in roles" :value="role">{{ role }}</option>
+            </select>
+          </label>
+          <label>Weekly Hours
+            <input name="weeklyHours" type="number" value="1" required>
+          </label>
+          <label>Start Date
+            <input name="startDate" type="date" :min="project.startDate" :value="project.startDate" required>
+          </label>
+          <label>End Date
+            <input name="endDate" type="date" :max="project.endDate" :value="project.endDate" required>
+          </label>
+        </div>
+        <div>Available Resources
+          <label v-for="resource in availableResources">
+            <input type="radio" name="resourceId" :value="resource.id"> {{ resource.name }}
+          </label>
+        </div>
       </div>
       <div class="grid">
         <button type="reset" :disabled="loading" @click="showRequest=false" class="secondary">Cancel</button>
