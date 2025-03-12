@@ -2,13 +2,22 @@ import { Router } from 'express'
 import projects from './projects.js'
 import resources from './resources.js'
 import projectResources from './projectResources.js'
+import { authorize, ROLES } from './auth.js'
 
 const apiRouter = Router()
+
+apiRouter.use('/auth', (req, res, next) => {
+  const authRoutes = Router()
+
+  authRoutes.get('/session', (req, res) => res.json(req.session.user))
+
+  authRoutes(req, res, next)
+})
 
 apiRouter.use('/projects', (req, res, next) => {
   const projectsRoutes = Router()
 
-  projectsRoutes.post('/', (req, res) => res.json(projects.create(req.body)))
+  projectsRoutes.post('/', authorize(ROLES.PROJECT_MANAGER), (req, res) => res.json(projects.create(req.body)))
   projectsRoutes.get('/', (_, res) => res.json(projects.list()))
   projectsRoutes.put('/', (req, res) => res.json(projects.update(req.body)))
   projectsRoutes.get('/gantt', (req, res) => res.json(projects.gantt(req.query)))
@@ -34,11 +43,16 @@ apiRouter.use('/project-resources', (req, res, next) => {
   const projectResourcesRoutes = Router()
 
   projectResourcesRoutes.post('/', (req, res) => res.json(projectResources.create(req.body)))
-  projectResourcesRoutes.get('/', (_, res) => res.json(projectResources.list()))
+  projectResourcesRoutes.get('/', (req, res) => res.json(projectResources.list()))
+  projectResourcesRoutes.get('/mine', (req, res) => res.json(projectResources.listByApprover(req.session.user.id, req.query.status)))
   projectResourcesRoutes.put('/', (req, res) => res.json(projectResources.update(req.body)))
   projectResourcesRoutes.get('/:id', (req, res) => res.json(projectResources.read(req.params.id)))
 
   projectResourcesRoutes(req, res, next)
 })
+
+apiRouter.get('/roles', (_, res) => res.json(ROLES))
+
+apiRouter.all('*', (_, res) => res.status(404).json({ error: 'Route not found' }))
 
 export default apiRouter

@@ -4,6 +4,10 @@ import { spawn } from 'child_process'
 import session from 'express-session'
 import Logger from './src/logger.js'
 import apiRoutes from './src/apiRoutes.js'
+import dotenv from 'dotenv'
+import { authenticate } from './src/auth.js'
+
+dotenv.config()
 
 // const syncLog = new Logger('logs/sync.log')
 // const syncProc = spawn('node', ['src/sync.js'], {
@@ -17,11 +21,11 @@ import apiRoutes from './src/apiRoutes.js'
 
 const app = express()
 const port = 7000
-const webLog = new Logger('logs/web.log')
 
-app.use(morgan('dev', { stream: { write: str => webLog.info(str) } }))
+app.use(morgan('dev'))
 app.use(express.json())
-app.use(session({ secret: crypto.randomUUID(), resave: true, saveUninitialized: true }))
+app.use(session({ secret: crypto.randomUUID(), resave: false, saveUninitialized: false, cookie: { httpOnly: true } }))
+app.use(authenticate)
 app.use('/api', apiRoutes)
 app.use('/nm', express.static(import.meta.dirname + '/node_modules'))
 app.use('/assets', express.static(import.meta.dirname + '/public/assets'))
